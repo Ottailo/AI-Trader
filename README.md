@@ -12,7 +12,7 @@ The code sketches a workflow for collecting historical price data, training time
 - Asset CRUD handlers and market-data ingestion and retrieval handlers are implemented in source (`api/app/routers/assets.py`, `api/app/routers/market_data.py`). They depend on the database and, for ingestion, external market-data APIs.
 - The ML router defines training, prediction, model listing/deployment, and backtest handlers (`api/app/routers/ml.py`). The project includes model, feature engineering, training, prediction, and strategy/backtest modules.
 - The health router has basic, detailed, readiness, and liveness endpoints (`api/app/routers/health.py`).
-- The tests define health endpoint checks and ML test cases (`api/tests/`). Test execution and endpoint behavior were not verified for this draft.
+- The tests define health endpoint checks and ML test cases (`api/tests/`). On 2026-11-23, `python -m compileall -q app tests` passed, but `pytest` collection failed before tests ran because required settings were absent and `app.models` is missing.
 
 The checked-in API has no `api/app/models/` directory in this checkout, despite imports of `app.models` throughout the API, and the only migration file creates only ML model and backtest tables. Those gaps mean several described flows are not runnable as-is without repair.
 
@@ -145,7 +145,7 @@ The `api/app/services/data_ingestion.py` code expects asset records and OHLCV hi
 
 The project declares pytest under the `dev` optional dependency group and configures `testpaths = ["tests"]` in `api/pyproject.toml`. It includes `api/tests/test_health.py` and `api/tests/test_ml.py`.
 
-The ML test file in this checkout is empty. The health tests use `TestClient` and import `app.main`, but import-time settings require environment variables and the application imports model modules that are absent here. No tests were run, and a passing test result is not claimed.
+The ML test file in this checkout is empty. The health tests use `TestClient` and import `app.main`, but import-time settings require environment variables and the application imports model modules that are absent here. Verified on 2026-11-23: `python -m compileall -q app tests` passes; `pytest` collection fails before tests run because required settings are absent and `app.models` is missing. No passing test result is claimed.
 
 The `api/package.json` declares `test` as `pytest`, but that is a package script invoking a Python tool, not a pnpm frontend test suite. The root test script recursively runs workspace scripts; the missing `web` package leaves that workflow unverified.
 
@@ -176,6 +176,7 @@ These describe code organization, not verified operating behavior.
 - The prediction signal's confidence is derived from expected-return magnitude relative to a threshold, not a calibrated probability.
 - The backtesting engine and trade-statistics implementation have not been validated against known reference cases. No performance or profitability claim is made.
 - The environment template has placeholder secrets and example trading parameters. Do not use them with a funded brokerage account.
+- The checked-in test suite cannot collect without the required environment settings and the missing `app.models` package.
 - No license file is present in this checkout, despite the package metadata and old README claiming MIT. License terms were not verified.
 
 ## Roadmap
